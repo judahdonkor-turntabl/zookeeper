@@ -1,6 +1,7 @@
 package org.apache.zookeeper.server.auth;
 
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -9,12 +10,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
     private String googleAccessToken;
+    private JSONObject clientJSON;
+    private static final Map<String, Integer> SCOPE_PERM_MAP = Collections.unmodifiableMap(new HashMap<String, Integer>() {{
+        put("oidc", ZooDefs.Perms.CREATE);
+        put("email", ZooDefs.Perms.READ);
+        put("read", ZooDefs.Perms.WRITE);
+    }});
 
     @Override
     public String getScheme() {
@@ -38,12 +44,7 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
             String accessTokenJwt = getAccessTokenJwt(this.googleAccessToken);
             System.out.println(accessTokenJwt);
 
-            JSONObject json = new JSONObject(accessTokenJwt);
-
-            List<String> scopes = Arrays.stream(json.getString("scope").split(" ")).collect(Collectors.toList());
-            System.out.println(scopes);
-
-
+            this.clientJSON = new JSONObject(accessTokenJwt);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -53,7 +54,22 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
 
     @Override
     public boolean matches(ServerObjs serverObjs, MatchValues matchValues) {
-        return false;
+        if (clientJSON == null) return false;
+
+        String sub = clientJSON.optString("sub", null);
+        if (sub == null || !sub.equals(matchValues.getAclExpr())) return false;
+
+        List<String> scopes = Arrays.asList(clientJSON.optString("scope", "").split(" "));
+        Set<Integer> allowedPerms = getAllowedPermsFromScopes(scopes);
+
+        return allowedPerms.contains(matchValues.getPerm());
+    }
+
+    private Set<Integer> getAllowedPermsFromScopes(List<String> scopes) {
+        return scopes.stream()
+                .map(SCOPE_PERM_MAP::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     private String getAccessTokenJwt(String accessToken) throws IOException {
