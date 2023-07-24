@@ -10,16 +10,22 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
+public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
     private String googleAccessToken;
     private JSONObject clientJSON;
     private static final Map<String, Integer> SCOPE_PERM_MAP = Collections.unmodifiableMap(new HashMap<String, Integer>() {{
         put("openid", ZooDefs.Perms.CREATE);
         put("email", ZooDefs.Perms.READ);
-        put("read", ZooDefs.Perms.WRITE);
+        put("profile", ZooDefs.Perms.WRITE);
     }});
 
     @Override
