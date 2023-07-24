@@ -17,7 +17,7 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
     private String googleAccessToken;
     private JSONObject clientJSON;
     private static final Map<String, Integer> SCOPE_PERM_MAP = Collections.unmodifiableMap(new HashMap<String, Integer>() {{
-        put("oidc", ZooDefs.Perms.CREATE);
+        put("openid", ZooDefs.Perms.CREATE);
         put("email", ZooDefs.Perms.READ);
         put("read", ZooDefs.Perms.WRITE);
     }});
