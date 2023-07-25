@@ -2,6 +2,7 @@ package org.apache.zookeeper.server.auth;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.data.Id;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -29,7 +30,7 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
 
     @Override
     public boolean isAuthenticated() {
-        return false;
+        return true;
     }
 
     @Override
@@ -45,6 +46,8 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider{
             System.out.println(accessTokenJwt);
 
             this.clientJSON = new JSONObject(accessTokenJwt);
+            String sub = clientJSON.optString("sub", "");
+            serverObjs.getCnxn().addAuthInfo(new Id("oidc", sub));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
