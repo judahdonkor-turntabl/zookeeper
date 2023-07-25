@@ -21,12 +21,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
-    private String googleAccessToken;
     private JSONObject clientJSON;
     private static final Map<String, Integer> SCOPE_PERM_MAP = Collections.unmodifiableMap(new HashMap<String, Integer>() {{
         put("openid", ZooDefs.Perms.CREATE);
-        put("email", ZooDefs.Perms.READ);
-        put("profile", ZooDefs.Perms.WRITE);
+        put("https://www.googleapis.com/auth/userinfo.email", ZooDefs.Perms.READ);
+        put("https://www.googleapis.com/auth/userinfo.profile", ZooDefs.Perms.WRITE);
     }});
 
     @Override
@@ -47,18 +46,22 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
     @Override
     public KeeperException.Code handleAuthentication(ServerObjs serverObjs, byte[] authData) {
         try {
-            this.googleAccessToken = new String(authData);
-            String accessTokenJwt = getAccessTokenJwt(this.googleAccessToken);
+            String googleAccessToken = new String(authData);
+            String accessTokenJwt = getAccessTokenJwt(googleAccessToken);
             System.out.println(accessTokenJwt);
 
             this.clientJSON = new JSONObject(accessTokenJwt);
             String sub = clientJSON.optString("sub", "");
-            serverObjs.getCnxn().addAuthInfo(new Id("oidc", sub));
+            if(sub != null){
+                serverObjs.getCnxn().addAuthInfo(new Id("oidc", sub));
+                return KeeperException.Code.OK;
+            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return KeeperException.Code.OK;
+        return KeeperException.Code.AUTHFAILED;
     }
 
     @Override
