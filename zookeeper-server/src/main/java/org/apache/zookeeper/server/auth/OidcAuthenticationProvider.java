@@ -40,13 +40,7 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
 
     @Override
     public boolean isValid(String id) {
-        String tokenJwt = null;
-        try {
-            tokenJwt = getAccessTokenJwt(id);
-        } catch (IOException ioException) {
-            throw new RuntimeException(ioException);
-        }
-        return tokenJwt.contains("aud") && tokenJwt.contains("exp");
+        return clientJSON.getString("aud") != null && clientJSON.getString("exp") != null;
     }
 
     @Override
