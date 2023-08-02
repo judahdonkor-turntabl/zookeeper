@@ -1,0 +1,43 @@
+package org.apache.zookeeper.server.auth;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.data.Id;
+
+public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
+    private DecodedJWT jwt;
+    @Override
+    public String getScheme() {
+        return "oidc";
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return true;
+    }
+
+    @Override
+    public boolean isValid(String id) {
+        return jwt.getClaim("aud") != null && jwt.getClaim("exp") != null;
+    }
+
+    @Override
+    public KeeperException.Code handleAuthentication(ServerObjs serverObjs, byte[] authData) {
+        String accessToken = new String(authData);
+        this.jwt = JWT.decode(accessToken);
+        String sub = this.jwt.getClaim("sub").asString();
+
+        if(sub != null){
+            serverObjs.getCnxn().addAuthInfo(new Id("oidc", sub));
+            return KeeperException.Code.OK;
+        }
+
+        return KeeperException.Code.AUTHFAILED;
+    }
+
+    @Override
+    public boolean matches(ServerObjs serverObjs, MatchValues matchValues) {
+        return true;
+    }
+}
