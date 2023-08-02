@@ -3,6 +3,8 @@ package org.apache.zookeeper.server.auth;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
+import com.auth0.jwt.JWT;
+import org.apache.zookeeper.data.Id;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
     }});
 
     private DecodedJWT jwt;
+  
     @Override
     public String getScheme() {
         return "oidc";
@@ -28,12 +31,21 @@ public class OidcAuthenticationProvider extends ServerAuthenticationProvider {
 
     @Override
     public boolean isValid(String id) {
-        return true;
+        return jwt.getClaim("aud") != null && jwt.getClaim("exp") != null;
     }
 
     @Override
     public KeeperException.Code handleAuthentication(ServerObjs serverObjs, byte[] authData) {
-        return KeeperException.Code.OK;
+        String accessToken = new String(authData);
+        this.jwt = JWT.decode(accessToken);
+        String sub = this.jwt.getClaim("sub").asString();
+
+        if(sub != null){
+            serverObjs.getCnxn().addAuthInfo(new Id("oidc", sub));
+            return KeeperException.Code.OK;
+        }
+
+        return KeeperException.Code.AUTHFAILED;
     }
 
     @Override
