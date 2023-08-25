@@ -1,0 +1,49 @@
+package org.apache.zookeeper.server.auth;
+
+import org.apache.zookeeper.server.auth.token.StandardizedTokenData;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+class OidcAuthenticationProviderTest {
+
+    @Test
+    void testAuthenticationForActiveJWTToken() {
+        //token may be expired so generate a new one with Auth0
+        String JWTAccessToken  ="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFOalFNX29IYldZSW1FTmt2OGdLUSJ9.eyJpc3MiOiJodHRwczovL2Rldi1sd3JyNDJrZTZzbGRud3pmLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJCUXdoUnpPOFdFYjNsaThyTVlZV2RmcmpiN0tObWR6dUBjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly96b29rZWVwZXItb2lkYy5jb20vIiwiaWF0IjoxNjkyOTY5OTMwLCJleHAiOjE2OTMwNTYzMzAsImF6cCI6IkJRd2hSek84V0ViM2xpOHJNWVlXZGZyamI3S05tZHp1Iiwic2NvcGUiOiJ6b29rZWVwZXI6em5vZGU6Y3JlYXRlIHpvb2tlZXBlcjp6bm9kZTpyZWFkIHpvb2tlZXBlcjp6bm9kZTp3cml0ZSB6b29rZWVwZXI6em5vZGU6ZGVsZXRlIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.hZ70zGtLvNvIByM6iO3nixr6SbolhBXPO3_FTT_TxTFWKf1z2j5eJRblMu6nLL3SG1BYKp-kMRChmF1zttOwllUkcexOWf4hI4HE4fhCJN7LHrcHxXSVml90V_KpBPfhfjEKh8KRhahwb-esGAWC7AorXvVpE83wIMqb1mIVKb54wIrNq4vhXuW5qHOrV-BeneSCF8xm_mBbkR4Am-LQ_axE2CPohr_aArPIhBQujmKQjo0NV3Yn4Qddr9NzqE2E90G-LnHUaxHrjJtaddubptzPRRHzvJTG0FNrJNxIh7v9d13jEF8ycptyqQHCITvpvBUQ-HGhIYpwUHIRsMb-zQ";
+        OidcAuthenticationProvider oidcAuthenticationProvider = new OidcAuthenticationProvider();
+        StandardizedTokenData standardizedTokenData = oidcAuthenticationProvider.getStandardizedStructure(JWTAccessToken);
+        Assertions.assertNotNull(standardizedTokenData);
+        Assertions.assertNotNull(standardizedTokenData.getUserId());
+        Assertions.assertNotNull(standardizedTokenData.getGroups());
+        System.out.println(standardizedTokenData);
+
+    }
+    @Test
+    void testAuthenticationForExpiredJWTToken() {
+        String JWTAccessToken  ="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImFOalFNX29IYldZSW1FTmt2OGdLUSJ9.eyJpc3MiOiJodHRwczovL2Rldi1sd3JyNDJrZTZzbGRud3pmLnVzLmF1dGgwLmNvbS8iLCJzdWIiOiJCUXdoUnpPOFdFYjNsaThyTVlZV2RmcmpiN0tObWR6dUBjbGllbnRzIiwiYXVkIjoiaHR0cHM6Ly96b29rZWVwZXItb2lkYy5jb20vIiwiaWF0IjoxNjkyODUwMjI0LCJleHAiOjE2OTI5MzY2MjQsImF6cCI6IkJRd2hSek84V0ViM2xpOHJNWVlXZGZyamI3S05tZHp1Iiwic2NvcGUiOiJ6b29rZWVwZXI6em5vZGU6Y3JlYXRlIHpvb2tlZXBlcjp6bm9kZTpyZWFkIHpvb2tlZXBlcjp6bm9kZTp3cml0ZSB6b29rZWVwZXI6em5vZGU6ZGVsZXRlIiwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIn0.SvxjGYNgXHZQERyeFkBq-yyk-_JNtYT0adtYwbsO_av4M8AHimbCU-umnYMgVg0pRIYiYwlqKY4MYvRYNUKt3josb-mIyyvX7LQ17lc_CbKez54DYB47_smjRp_sN9wtMOBhM63UgEZx8rJ2ViqqqrtSdj7eArj9uqo0ZvIAdQMqLM5uNjovIfXmGvqFJL7vxxlMm12l7-4rIBMGMNIZsOVlT9kSqNRvTF1qOcZIQJOhZzNW8gQyKf1aXcF076qp1Sc9ppbXcx_0as-ZJt77ygK1JbzOQRuP1IRea8R8XH_jp-HMJCzXNFEB-4UA5yqPCB7YkHlvnNC5p8k-UFeP1A";
+        OidcAuthenticationProvider oidcAuthenticationProvider = new OidcAuthenticationProvider();
+        StandardizedTokenData standardizedTokenData = oidcAuthenticationProvider.getStandardizedStructure(JWTAccessToken);
+        Assertions.assertNull(standardizedTokenData);
+    }
+    @Test
+    void testAuthenticationForActiveOpaqueToken() {
+        //token may be expired so generate a new one with google
+        String opaqueAccessToken  ="ya29.c.b0Aaekm1L0GYbKW6q3bVYpjmftXBNxevigCW6zmRBx8YrjnWHGjksEMmOjEKJXWEiDyZmHC0nC_buH4jPlQe3BNuiwglAVl0f64VO8UzG7aotT5u7ygoF9VrTcoSwls4aYpQHr4iRU6Wn0ZysUwfaBdoNIxPaVqKdeBMuY27bLokEslDq9dTX1zHBFHGkbyS4RbXZp9I_DyI3JAi8uwVGkLnAzzFEFRogBXANFFOSdOhC26XMevA2HWmPG4Dcef6nhAnDmtJibquZUzNhCxMnN33TtfG7cqWZxafDH02UnvC9B1jEA8WUP8l7qQ4GwlGztnWmPG-kjcSadG341C7BzbaXtmBF9_gtWYYsYgaV54es3rl991yx8ei-79cq03npMWJZVVp4wiBI4x9JdievkBxSnpglxBZq92tovw1mmQFuhnqu0i1dS3-_W0p935__O-nZwm4waYw4Xh113QtadaBFbiXYcl13q93dk4Wyb1qU1We7ZiBRSlk5pk3jUngiri-vr3Up9OwBbMdYX605O41Y-2bViMdOpdX1UMlI8R6gy2mY2fupiSamJ2rc7fBRx9dh-QvBwB-l384deRUbka3hqMW37muIesi2XyYXpj6FOgeFWwoYZlqZcZI872eaRwjvypbRRxzjcu44r37_gjysozws9ript_jbetwmu5yu2OJI7gXq8XVQ_wyn-3Y9F2O5Qs2ZJ9w_JX5S2e_e3pejIBXQz6zSabaVXscz0k62BjOnhm7-evh3134v9Bxy4dszhfJ30WVXegy_J97zBF_oWIv9yxl992MS8ZJsxdX-Jfx8kcIQ5SV5Z-F24Bl2scZFlchofjUlF8hJIXzxZsv0OJR0UUws0-BIw35IzMFV3zf2wiRdmMix4SRZah3Oy-rv8f69viOtp9ge_ioRrp5U1srunoB_yJq4vvpdxF5v5Us236mcBSaBM1ez_hvRUq_WsYedcWs2Y1oB78Z76IjMoR8qrnqw2YMu_z13m91c1l_i6agriJZo";
+        OidcAuthenticationProvider oidcAuthenticationProvider = new OidcAuthenticationProvider();
+        StandardizedTokenData standardizedTokenData = oidcAuthenticationProvider.getStandardizedStructure(opaqueAccessToken);
+        Assertions.assertNotNull(standardizedTokenData);
+        Assertions.assertNotNull(standardizedTokenData.getUserId());
+        Assertions.assertNotNull(standardizedTokenData.getGroups());
+        System.out.println(standardizedTokenData);
+
+    }
+
+    @Test
+    void testAuthenticationForExpiredOpaqueToken() {
+        String opaqueAccessToken  ="ya29.c.b0Aaekm1INDLG0L1bv-9vcqS-K3p6QjljagbLTnAfbIqW6oQuzoCyW0VXbbklKqyrnIHZgVaLRelJaExLY2dpNeRzqEq2w9Z3xod-s5iZ63pFe1UGnYpPOSf7HY-cbd_rkukTLlq9PFed4FiLBkYS-CnIkIQvUChJYHl8-sw1RuPjSge1L1942_uIUzNB7vBlEeBaIeNvq2JMOQFA77LJX-F_H9o3pK1YNx_iQ7asqUp7zWlpfZs-12nM9UH_fBnlSCJlJV4yLfWVDCUodd6CBL7fSa4SxWPoZaPxTWb2SDM3iv48agMpp5LZEUdI_M6xQIZYii-B2SgH339K9vjigJ5aYa-frV3fh07Ro1VVm_zYgMf7hQVMfyh1tr5MVfamYIOpFh25qahY1cwxvyeYag67fiX2kBmt8OQ7oi5abt8pj3JQ1mUefs5hj4gldS1rmvIkgM0rIWp09ZaZiR_gzOt9_Bw1YunIceeBOVld1R0_12v1jBvsxscb3lhd2J8-zn5Xaop4Z9ywOa4YJmpa3_BZepwxYMtMSoqB2rWlo-415aM8y-bdq5qxVdfrU8Fsqvn7SqjmjzMeqrXnZapmr6ok5tJcvSuee2-oVWUumrVzfhlUs-ueczS5aSB56ve4mX9igpv2y3td-_0iQfJ47nUrtrIMu8es5zBs5dpQZOSQxaw98lFF9IpJosol7taFl7-exZ-beWW4lpvrVsXUiQ43U9nuFfYZsd5Wk3BJ4s2fJRVhrYi1ySeVvv3o4_J8mko058WfeSf3mBmi5VJ0rIt2oWskt9BbF30ocu_akBYBxiSXaVn958eWujllQy0_FwlQS-w8w-3-Vp3lJaFQWhybuy2lpqkR9Z36w2Y-fwsr0nl2qYj755hlX_vi6pXVFUfpFRpFuOu-gpzqZ6hXr9VVwjfQw4ZJBWkRzlunMqahStYwnYkxf2xraVIzkOJ6bq1F3RpR_70b9klf1QgU9-itBm70WY0uQZbOrya1ye1ofUeOsSS71_2v";
+        OidcAuthenticationProvider oidcAuthenticationProvider = new OidcAuthenticationProvider();
+        StandardizedTokenData standardizedTokenData = oidcAuthenticationProvider.getStandardizedStructure(opaqueAccessToken);
+        Assertions.assertNull(standardizedTokenData);
+    }
+
+}
