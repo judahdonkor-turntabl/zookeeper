@@ -3,20 +3,41 @@ package org.apache.zookeeper.server.auth;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.ServerCnxn;
+import org.apache.zookeeper.server.auth.oidc.AccessToken;
+import org.apache.zookeeper.server.auth.oidc.AccessTokenProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public class OIDCAuthenticationProvider implements AuthenticationProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OIDCAuthenticationProvider.class);
+
     @Override
     public String getScheme() {
-        return null;
+        return "oidc";
     }
 
     @Override
     public KeeperException.Code handleAuthentication(ServerCnxn cnxn, byte[] authData) {
-        return null;
+        try {
+
+            AccessToken accessToken = new AccessTokenProcessor().process(authData);
+            if (!accessToken.getGroups().isEmpty()) {
+                accessToken.getGroups().forEach(groupID -> cnxn.addAuthInfo(new Id(getScheme(), groupID)));
+            }
+
+            if (!accessToken.getUserID().isEmpty()) {
+                cnxn.addAuthInfo(new Id(getScheme(), accessToken.getUserID()));
+            }
+
+            return KeeperException.Code.OK;
+        } catch (Exception exception) {
+            LOG.error(exception.getMessage());
+            return KeeperException.Code.AUTHFAILED;
+        }
     }
 
     @Override
