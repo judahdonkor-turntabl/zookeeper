@@ -40,7 +40,7 @@ public class OIDCAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean matches(String id, String aclExpr) {
-        return id.matches(aclExpr);
+        return id.equals(aclExpr);
     }
 
     @Override
