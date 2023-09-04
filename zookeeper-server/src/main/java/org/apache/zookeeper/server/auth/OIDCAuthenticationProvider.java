@@ -53,7 +53,7 @@ public class OIDCAuthenticationProvider implements AuthenticationProvider {
         String[] parts = id.split(":");
 
         return parts.length == 2 &&
-                (parts[0] == "uid" || parts[0] == "gid");
+                (parts[0].equals("uid")  || parts[0].equals("gid"));
     }
 
     @Override
