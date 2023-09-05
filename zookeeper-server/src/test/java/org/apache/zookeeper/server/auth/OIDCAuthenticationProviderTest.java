@@ -38,6 +38,41 @@ class OIDCAuthenticationProviderTest {
     }
 
     @Test
+    void isValidWithNullId() {
+        String nullId = null;
+
+        assertFalse(oidcAuthenticationProvider.isValid(nullId));
+    }
+
+    @Test
+    void isValidWithEmptyIdString() {
+        String emptyId = "";
+
+        assertFalse(oidcAuthenticationProvider.isValid(emptyId));
+    }
+
+    @Test
+    void isValidWithOnlyDelimiterInId() {
+        String invalidId = ":";
+
+        assertFalse(oidcAuthenticationProvider.isValid(invalidId));
+    }
+
+    @Test
+    void isValidWithOnlyPrefixInId() {
+        String invalidGroupId = "gid:";
+
+        assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
+    }
+
+    @Test
+    void isValidWithOnlySuffixInId() {
+        String invalidGroupId = ":groupTwo";
+
+        assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
+    }
+
+    @Test
     void matchesWithIdenticalIds() {
         String id = "uid:userOne";
         String aclExpr = "uid:userOne";
