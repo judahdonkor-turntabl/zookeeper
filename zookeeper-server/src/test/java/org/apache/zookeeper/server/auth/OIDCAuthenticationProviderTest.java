@@ -36,4 +36,20 @@ class OIDCAuthenticationProviderTest {
 
         assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
     }
+
+    @Test
+    void matchesWithIdenticalIds() {
+        String id = "uid:userOne";
+        String aclExpr = "uid:userOne";
+
+        assertTrue(oidcAuthenticationProvider.matches(id, aclExpr));
+    }
+
+    @Test
+    void matchesWithUnidenticalIds() {
+        String id = "uid:userOne";
+        String aclExpr = "gid:groupOne";
+
+        assertFalse(oidcAuthenticationProvider.matches(id, aclExpr));
+    }
 }
