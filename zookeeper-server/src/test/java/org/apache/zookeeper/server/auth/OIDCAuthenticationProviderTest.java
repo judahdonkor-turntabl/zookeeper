@@ -1,6 +1,9 @@
 package org.apache.zookeeper.server.auth;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,67 +12,17 @@ class OIDCAuthenticationProviderTest {
 
     private final OIDCAuthenticationProvider oidcAuthenticationProvider = new OIDCAuthenticationProvider();
 
-    @Test
-    void isValidWithValidUserId() {
-        String validUserId = "uid:userOne";
-
-        assertTrue(oidcAuthenticationProvider.isValid(validUserId));
+    @ParameterizedTest
+    @ValueSource(strings = {"uid:userOne", "gid:groupOne"})
+    void isValidSHouldReturnTrueWithValidIds(String input){
+        assertTrue(oidcAuthenticationProvider.isValid(input));
     }
 
-    @Test
-    void isValidWithInvalidUserId() {
-        String invalidUserId = "uuid.userTwo";
-
-        assertFalse(oidcAuthenticationProvider.isValid(invalidUserId));
-    }
-
-    @Test
-    void isValidWithValidGroupId() {
-        String validGroupId = "gid:groupOne";
-
-        assertTrue(oidcAuthenticationProvider.isValid(validGroupId));
-    }
-
-    @Test
-    void isValidWithInvalidGroupId() {
-        String invalidGroupId = "gid:group:Two";
-
-        assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
-    }
-
-    @Test
-    void isValidWithNullId() {
-        String nullId = null;
-
-        assertFalse(oidcAuthenticationProvider.isValid(nullId));
-    }
-
-    @Test
-    void isValidWithEmptyIdString() {
-        String emptyId = "";
-
-        assertFalse(oidcAuthenticationProvider.isValid(emptyId));
-    }
-
-    @Test
-    void isValidWithOnlyDelimiterInId() {
-        String invalidId = ":";
-
-        assertFalse(oidcAuthenticationProvider.isValid(invalidId));
-    }
-
-    @Test
-    void isValidWithOnlyPrefixInId() {
-        String invalidGroupId = "gid:";
-
-        assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
-    }
-
-    @Test
-    void isValidWithOnlySuffixInId() {
-        String invalidGroupId = ":groupTwo";
-
-        assertFalse(oidcAuthenticationProvider.isValid(invalidGroupId));
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"uuid.userTwo", "gid:group:Two", ":", "gid:", ":groupTwo"})
+    void isValidSHouldReturnFalseWithInvalidIds(String input){
+        assertFalse(oidcAuthenticationProvider.isValid(input));
     }
 
     @Test
