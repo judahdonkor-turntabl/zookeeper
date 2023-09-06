@@ -51,6 +51,11 @@ public class OIDCAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public boolean isValid(String id) {
+
+        if (id == null) {
+            return false;
+        }
+
         String[] parts = id.split(":");
 
         return parts.length == 2 &&
