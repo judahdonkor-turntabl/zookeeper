@@ -3,6 +3,7 @@ package org.apache.zookeeper.server.auth;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.ServerCnxn;
+import org.apache.zookeeper.server.auth.oidc.ACLUtils;
 import org.apache.zookeeper.server.auth.oidc.AccessToken;
 import org.apache.zookeeper.server.auth.oidc.AccessTokenProcessor;
 import org.slf4j.Logger;
@@ -63,17 +64,12 @@ public class OIDCAuthenticationProvider implements AuthenticationProvider {
 
     private List<Id> handleAuthentication(final byte[] authData) {
 
-        final List<Id> ids = new ArrayList<>();
+        List<Id> ids = new ArrayList<>();
 
         try {
             AccessToken accessToken = new AccessTokenProcessor().process(authData);
-            if (!accessToken.getGroups().isEmpty()) {
-                accessToken.getGroups().forEach(groupID -> ids.add(new Id(getScheme(), "gid:" + groupID)));
-            }
+            ids = ACLUtils.getIdsFromAccessToken(accessToken, getScheme());
 
-            if (!accessToken.getUserID().isEmpty()) {
-                ids.add(new Id(getScheme(), "uid:" + accessToken.getUserID()));
-            }
         } catch (Exception exception) {
             LOG.error(exception.getMessage());
         }
