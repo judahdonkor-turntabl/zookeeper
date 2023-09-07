@@ -1,11 +1,9 @@
-package org.apache.zookeeper.server.auth;
+package org.apache.zookeeper.server.auth.oidc;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.server.ServerCnxn;
-import org.apache.zookeeper.server.auth.oidc.ACLUtils;
-import org.apache.zookeeper.server.auth.oidc.AccessToken;
-import org.apache.zookeeper.server.auth.oidc.AccessTokenProcessor;
+import org.apache.zookeeper.server.auth.AuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +15,8 @@ import java.util.List;
 public class OIDCAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCAuthenticationProvider.class);
+    public static final String GROUP_ID_PREFIX = "gid";
+    public static final String USER_ID_PREFIX = "uid";
 
     @Override
     public String getScheme() {
@@ -59,7 +59,7 @@ public class OIDCAuthenticationProvider implements AuthenticationProvider {
         String[] parts = id.split(":");
 
         return parts.length == 2 &&
-                (parts[0].equals("uid")  || parts[0].equals("gid"));
+                (parts[0].equals(USER_ID_PREFIX)  || parts[0].equals(GROUP_ID_PREFIX));
     }
 
     @Override

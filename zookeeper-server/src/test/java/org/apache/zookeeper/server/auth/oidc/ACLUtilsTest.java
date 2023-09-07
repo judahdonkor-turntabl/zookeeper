@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ACLUtilsTest {
 
     @Test
-    void getIdsFromAccessToken() {
+    void getIdsFromAccessTokenWithUserIdAndGroupsPresent() {
         AccessToken accessToken = new AccessToken();
         String scheme = "oidc";
         accessToken.setUserID("userOne");
