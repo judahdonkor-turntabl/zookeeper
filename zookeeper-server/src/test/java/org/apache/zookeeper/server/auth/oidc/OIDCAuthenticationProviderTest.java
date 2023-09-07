@@ -1,5 +1,6 @@
-package org.apache.zookeeper.server.auth;
+package org.apache.zookeeper.server.auth.oidc;
 
+import org.apache.zookeeper.server.auth.oidc.OIDCAuthenticationProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
