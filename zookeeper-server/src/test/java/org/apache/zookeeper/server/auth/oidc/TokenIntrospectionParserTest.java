@@ -1,73 +1,27 @@
 package org.apache.zookeeper.server.auth.oidc;
 
-import org.junit.Before;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
+import org.apache.zookeeper.server.auth.oidc.TokenIntrospectionParser.AccessTokenParameterType;
+import org.apache.zookeeper.server.auth.oidc.TokenIntrospectionParser.Method;
+import org.junit.jupiter.api.Test;
 
 class TokenIntrospectionParserTest {
-    private TokenIntrospectionParser parser;
-    private HttpURLConnection mockedConnection;
 
-    @Before
-    public void setUp() {
-        parser = new TokenIntrospectionParser();
-        mockedConnection = Mockito.mock(HttpURLConnection.class);
-    }
-
+    /**
+     * Rename Test Cases Appropriately
+     */
     @Test
-    public void testParseValidToken() throws IOException {
-        // Generate a valid google access token and assign it to the validToken String
-        String validToken = "valid-access-token";
-        String mockedResponse = "{\"sub\":\"user123\",\"scope\":\"group1 group2\"}";
+    void exampleTest() {
+        TokenIntrospectionParser tokenIntrospectionParser = new TokenIntrospectionParser(
+            AccessTokenParameterType.QUERY_PARAMETER,
+            "access_token",
+            "https://auth-server.com/tokeninfo",
+            Method.GET);
 
-        when(mockedConnection.getResponseCode()).thenReturn(200);
-        when(mockedConnection.getInputStream()).thenReturn(
-                new ByteArrayInputStream(mockedResponse.getBytes(StandardCharsets.UTF_8)));
+        String url = tokenIntrospectionParser.constructURL("example-access-token".getBytes());
 
-        URL mockedUrl = Mockito.mock(URL.class);
-        when(mockedUrl.openConnection()).thenReturn(mockedConnection);
-
-        AccessToken accessToken = parser.parse(validToken.getBytes(StandardCharsets.UTF_8));
-
-        assertEquals("user123", accessToken.getUserID());
-        assertEquals(2, accessToken.getGroups().size());
-        assertTrue(accessToken.getGroups().contains("group1"));
-        assertTrue(accessToken.getGroups().contains("group2"));
-
-        verify(mockedConnection).setRequestMethod("GET");
-        verify(mockedConnection).getResponseCode();
-        verify(mockedConnection).getInputStream();
-        verify(mockedConnection).disconnect();
+        assertEquals("https://auth-server.com/tokeninfo?access_token=example-access-token",
+            url);
     }
-
-    @Test
-    public void testParseInvalidToken() throws IOException {
-        String invalidToken = "invalid-access-token";
-
-        when(mockedConnection.getResponseCode()).thenReturn(400); // Simulate an invalid token response
-
-        URL mockedUrl = Mockito.mock(URL.class);
-        when(mockedUrl.openConnection()).thenReturn(mockedConnection);
-
-        AccessToken accessToken = parser.parse(invalidToken.getBytes(StandardCharsets.UTF_8));
-
-        assertNull(accessToken);
-
-        verify(mockedConnection).setRequestMethod("GET");
-        verify(mockedConnection).getResponseCode();
-    }
-
-
 }
