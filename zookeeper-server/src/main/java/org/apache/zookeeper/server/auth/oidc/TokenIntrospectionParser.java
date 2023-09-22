@@ -16,9 +16,11 @@ public class TokenIntrospectionParser implements AccessTokenParser {
     }
 
     public String constructURL(byte[] accessTokenBytes) {
-        throw new UnsupportedOperationException();
+        if(accessTokenParameterType.equals(AccessTokenParameterType.PATH_PARAMETER)){
+            return tokenIntrospectionEndpoint + "/" + accessTokenParameterName + "/" + new String(accessTokenBytes);
+        }
+        return null;
     }
-
     //    Authorization Server Developer
 //    access token
 //    endpoint
@@ -47,6 +49,10 @@ public class TokenIntrospectionParser implements AccessTokenParser {
         GET
     }
 
+    public enum AccessTokenParameterType {
+        QUERY_PARAMETER, PATH_PARAMETER,
+    }
+
     @Override
     public boolean isStructured() {
         return false;
@@ -55,9 +61,5 @@ public class TokenIntrospectionParser implements AccessTokenParser {
     @Override
     public boolean isParsable() {
         return false;
-    }
-
-    public enum AccessTokenParameterType {
-        QUERY_PARAMETER, HEADER_PARAMETER
     }
 }
