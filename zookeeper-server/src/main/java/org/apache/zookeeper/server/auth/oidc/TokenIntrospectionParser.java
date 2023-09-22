@@ -18,6 +18,8 @@ public class TokenIntrospectionParser implements AccessTokenParser {
     public String constructURL(byte[] accessTokenBytes) {
         if(accessTokenParameterType.equals(AccessTokenParameterType.PATH_PARAMETER)){
             return tokenIntrospectionEndpoint + "/" + accessTokenParameterName + "/" + new String(accessTokenBytes);
+        }else if(accessTokenParameterType.equals(AccessTokenParameterType.QUERY_PARAMETER)){
+            return tokenIntrospectionEndpoint + "?" + accessTokenParameterName + "=" + new String(accessTokenBytes);
         }
         return null;
     }
