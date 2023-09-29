@@ -17,7 +17,7 @@ public class TokenIntrospectionParser implements AccessTokenParser {
         this.tokenIntrospectionEndpoint = tokenIntrospectionEndpoint;
         this.method = method;
     }
-
+  
     public String constructURL(byte[] accessTokenBytes) throws Exception {
         if(accessTokenParameterType.equals(AccessTokenParameterType.PATH_PARAMETER)) {
             if (accessTokenParameterName.contains(accessToken))
