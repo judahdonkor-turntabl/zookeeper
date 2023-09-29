@@ -15,6 +15,7 @@ public class TokenIntrospectionParser implements AccessTokenParser {
     private final String accessTokenParameterName;
     private final String tokenIntrospectionEndpoint;
     private final Method method;
+    private final String accessTokenPlaceholder = "{accesstoken}";
 
     public TokenIntrospectionParser(AccessTokenParameterType accessTokenParameterType,
         String accessTokenParameterName, String tokenIntrospectionEndpoint, Method method) {
@@ -24,14 +25,7 @@ public class TokenIntrospectionParser implements AccessTokenParser {
         this.method = method;
     }
 
-    public String constructURL(byte[] accessTokenBytes) {
-        if(accessTokenParameterType.equals(AccessTokenParameterType.PATH_PARAMETER)){
-            return tokenIntrospectionEndpoint + "/" + accessTokenParameterName + "/" + new String(accessTokenBytes);
-        }else if(accessTokenParameterType.equals(AccessTokenParameterType.QUERY_PARAMETER)){
-            return tokenIntrospectionEndpoint + "?" + accessTokenParameterName + "=" + new String(accessTokenBytes);
-        }
-        return null;
-    }
+
     //    Authorization Server Developer
 //    access token
 //    endpoint
@@ -55,11 +49,10 @@ public class TokenIntrospectionParser implements AccessTokenParser {
     public AccessToken parse(byte[] accessTokenBytes) {
 
         HttpClient httpClient = HttpClients.createDefault();
-        String url = constructURL(accessTokenBytes);
         HttpResponse response;
 
         try {
-            HttpUriRequest uriRequest = buildUri(url);
+            HttpUriRequest uriRequest = buildUri(accessTokenBytes);
             response = httpClient.execute(uriRequest);
         } catch (ClientProtocolException e) {
             throw new RuntimeException(e);
@@ -67,29 +60,33 @@ public class TokenIntrospectionParser implements AccessTokenParser {
             throw new RuntimeException(e);
         }
 
-        //Do something with response
-
+        //Do something with response and remove exception
         throw new UnsupportedOperationException();
     }
 
-    public HttpUriRequest buildUri(String url){
+    public HttpUriRequest buildUri(byte[] accessTokenBytes){
 
-        RequestBuilder requestBuilder;
+        RequestBuilder requestBuilder = RequestBuilder.create(method.toString().toLowerCase());
+        String accessToken = new String(accessTokenBytes);
+        String urlEndpoint;
 
-        switch (method){
-            case GET:
-                requestBuilder = RequestBuilder.get(url)
-                        .addHeader("get", "getter")
-                        .addParameter("abc", "def");
-                break;
-            case POST:
-                requestBuilder = RequestBuilder.post(url)
-                        .addHeader("post", "poster")
-                        .addParameter("mno", "qrt");
-                break;
-            default:
-                throw new UnsupportedOperationException();
+        if(AccessTokenParameterType.PATH_PARAMETER.equals(accessTokenParameterType)
+                && tokenIntrospectionEndpoint.contains(accessTokenPlaceholder)){
+
+            urlEndpoint = tokenIntrospectionEndpoint.replace(accessTokenPlaceholder, new String(accessTokenBytes));
+        } else if (AccessTokenParameterType.QUERY_PARAMETER.equals(accessTokenParameterType)) {
+
+            requestBuilder.addParameter(accessTokenParameterName, accessToken);
+            urlEndpoint = tokenIntrospectionEndpoint;
+        } else if (AccessTokenParameterType.HEADER_PARAMETER.equals(accessTokenParameterType)) {
+
+            requestBuilder.setHeader(accessTokenParameterName, accessToken);
+            urlEndpoint = tokenIntrospectionEndpoint;
+        }else{
+            throw new IllegalArgumentException();
         }
+
+        requestBuilder.setUri(urlEndpoint);
 
         return requestBuilder.build();
     }
@@ -101,7 +98,8 @@ public class TokenIntrospectionParser implements AccessTokenParser {
 
     public enum AccessTokenParameterType {
         QUERY_PARAMETER,
-        PATH_PARAMETER
+        PATH_PARAMETER,
+        HEADER_PARAMETER
     }
 
     @Override
